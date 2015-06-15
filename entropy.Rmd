@@ -1,0 +1,126 @@
+---
+title: "Entropy"
+author: "WTHOML-tvjoseph"
+date: "Monday, June 15, 2015"
+output: html_document
+---
+Introduction
+
+This is a program to calculate the entropy between two variables in a dataframe. The variables can be selected by the user along with the window within which entropy needs to be calculated for the given set of variables
+
+Step:1
+
+This program is dependent on the following library. Please run this library function to begin. In addition define the path where the csv file is located
+
+User Action : Run the library function and define the path to the csv file
+
+```{r}
+library(entropy)
+
+path <- "E:/elance/entropy1.csv"
+
+```
+
+Step :2
+
+The below function is the function to read the csv files and to define the entropy matrix and correlation matrix.
+
+User Action : Run the entr1 function
+
+```{r}
+
+entr1 <- function(path){  
+  entrop <- read.csv(path) ## Reading the csv files containing the variables
+  variables <- names(entrop) ## Finding the names of variables to select the variables for calculating entropy
+  varrows <- nrow(entrop) ## Finding number of rows in the df
+  varcol <- ncol(entrop) ## Finding the number of columns of the df
+  entr.matrix1 <- matrix(0,nrow = varcol,ncol = varcol) ## Defining empty matrices 
+  entr.matrix2 <- matrix(0,nrow = varcol,ncol = varcol) ## Defining empty matrices
+  colnames(entr.matrix1) <- variables
+  rownames(entr.matrix1) <- variables
+  colnames(entr.matrix2) <- variables
+  rownames(entr.matrix2) <- variables
+  list(result1=entr.matrix1,result2=entr.matrix2,result3=variables,result4=varrows,result5=entrop)
+}
+
+```
+
+Step : 3
+
+The below steps are to assign the matrices and certain variables outside the function so that it is available within the global environment.
+
+User Action : Run the below lines
+
+```{r}
+
+entr.matrix1 <- entr1(path)$result1 ## Run the Entropy matrix
+entr.matrix2 <- entr1(path)$result2 ## Run the Correlation matrix
+entrop <- entr1(path)$result5
+varrows <- entr1(path)$result4
+
+```
+
+Step : 4
+
+The below function is the main function to calculate the entropies between the selected variables and also to calculate the correlation between the variables. 
+
+User Action : Run the entr2 function
+
+```{r}
+
+entr2 <- function(var1,var2,entrow1,entrow2,bin1,bin2){
+  if(((entrow2-entrow1+1) > varrows)|(entrow1 > varrows)|(entrow2 > varrows)){stop("Rows selected are out of range")} ## Stopping the function if the rows selected are greater than the rows present
+  var1 <- paste0(var1,"$")
+  var2 <- paste0(var2,"$")
+  i <- grep(var1,colnames(entrop)) ## Finding the index of the first variable
+  j <- grep(var2,colnames(entrop)) ## Finding the index of the second variable
+  
+  X1 <- entrop[entrow1:entrow2,i] ## Selecting the first variable vector
+  Y1 <- entrop[entrow1:entrow2,j] ## Selecting the second variable vector
+  
+    
+  var.matrix <- discretize2d(X1,Y1,numBins1=bin1,numBins2=bin2) ## Making a matrix of the frequencies
+  
+  H1 <- entropy(rowSums(var.matrix)) ## Entropy of the first variable
+  H2 <- entropy(colSums(var.matrix)) ## Entropy of the second variable
+  H12 <- entropy(var.matrix) ## Joint entropy
+  gencor <- H1+H2-H12 ## Finding the correlation between the variables
+  
+  list(result1=H12,result2=gencor,result3=i,result4=j)    
+  
+}
+
+
+```
+
+Step 5 
+
+The below lines have to be executed to find the names of the variables and also to find the number of rows in the dataframe , so that the user can select the appropriate variables and sliding window.
+
+User Action : Run the below lines and select the variables for subsequent steps
+
+```{r}
+entr1(path)$result3 ## Run this line for selecting the variables
+entr1(path)$result4 ## Run this line for finding total rows in the dataframe
+
+```
+
+Step 6 
+
+The below steps executes the main function to calculate the entropy and correlation between the variables. 
+
+User Action : Enter var1, var2,window1,window2,bin1 & bin2 for executing the function.
+
+```{r}
+i <- entr2("var3","var5",6,14,5,5)$result3 ## Define the variables in the following order Variable1,variable2,window1,window2,bin1,bin2
+j <- entr2("var3","var5",6,14,5,5)$result4 
+
+entr.matrix1[i,j] <- entr2("var3","var5",6,14,5,5)$result1 ## Run this line to get the values for the entropy matrix
+entr.matrix1[j,i] <- entr.matrix1[i,j] ## Run this line to get both values for the entropy matrix
+entr.matrix2[i,j] <- entr2("var3","var5",6,14,5,5)$result2 ## Run this line to get the values for the correlation matrix
+entr.matrix2[j,i] <- entr.matrix2[i,j] ## Run this line to get both values for the correlation matrix
+
+entr.matrix1 ## displaying the entropy matrix
+entr.matrix2 ## displaying the correlation matrix
+```
+
