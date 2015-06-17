@@ -71,7 +71,7 @@ img {
 <p>This is a program to calculate the entropy between two variables in a dataframe. The variables can be selected by the user along with the window within which entropy needs to be calculated for the given set of variables</p>
 <p>Step:1</p>
 <p>Define the path where the csv file is located User Action : Define the path to the csv file</p>
-<pre class="r"><code>path &lt;- &quot;E:/elance/entropy.csv&quot;</code></pre>
+<pre class="r"><code>path &lt;- &quot;E:/elance/entropy1.csv&quot;</code></pre>
 <p>Step :2</p>
 <p>The below function is the function to read the csv files User Action : Run the entr1 function</p>
 <pre class="r"><code>entr1 &lt;- function(path){ 
@@ -91,20 +91,21 @@ varcol &lt;- entr1(path)$result3</code></pre>
 <p>The below function is the main function to calculate the entropies between the selected variables and also to calculate the correlation between the variables.</p>
 <p>User Action : Run the entr2 function</p>
 <pre class="r"><code>entr2 &lt;- function(wind){
-  if((wind &gt; varrow) | (wind &gt; varcol)){stop(&quot;Window selected is out of range&quot;)} ## Stopping the function if the window selected is greater than the number of rows or variables present
+  if(wind &gt; varrow){stop(&quot;Window selected is out of range&quot;)} ## Stopping the function if the window selected is greater than the number of rows or variables present
                
-entrop1 &lt;- entrop[1:wind,1:wind]
+entrop1 &lt;- entrop[1:wind,]
 variables &lt;- names(entrop1) ## listing the variables which are selected using the sliding window
-ent &lt;- matrix(0,nrow = wind,ncol=1) ## Defining the empty matrix for storing the entropy values
-ent1 &lt;- matrix(0,nrow= wind,ncol=wind) ## Defining the empty matrix for storing mutual entropy values
+clen &lt;- length(variables)
+ent &lt;- matrix(0,nrow = clen,ncol=1) ## Defining the empty matrix for storing the entropy values
+ent1 &lt;- matrix(0,nrow= clen,ncol=clen) ## Defining the empty matrix for storing mutual entropy values
 colnames(ent1) &lt;- variables
 rownames(ent1) &lt;- variables
-gcor &lt;- matrix(0,nrow= wind,ncol=wind) ## Defining the empty matrix for storing general correlation values
+gcor &lt;- matrix(0,nrow= clen,ncol=clen) ## Defining the empty matrix for storing general correlation values
 colnames(gcor) &lt;- variables
 rownames(gcor) &lt;- variables
  
  
-  for (i in 1:wind) {
+  for (i in 1:clen) {
  
   temp &lt;- as.data.frame(table(entrop1[,i])) ## This is to divide into bins and calculate the frequencies of each bins. The number of bins is equal to the unique values of the variable
   temp$prob &lt;- temp$Freq/wind ## Calculating the probabilities of each of the values
@@ -115,11 +116,11 @@ rownames(gcor) &lt;- variables
 
 ## Second For loop for calculating entropy and correlations
  
-    for ( i in 1:wind-1){
+    for ( i in 1:clen-1){
                
     j = i+1
                
-      for(k in j:wind){
+      for(k in j:clen){
  
         temp1 &lt;- entrop1[,c(i,k)] ## Creating a temporary data frame with only the relevant variables
         temp2 &lt;- as.data.frame(table(temp1))
@@ -136,8 +137,8 @@ rownames(gcor) &lt;- variables
     ent1[i,i] &lt;- 1
     gcor[i,i] &lt;- 1
                           }             
-    ent1[wind,wind] &lt;- 1 ## The below lines are to update the last diagonal cell with 1
-    gcor[wind,wind] &lt;- 1
+    ent1[clen,clen] &lt;- 1 ## The below lines are to update the last diagonal cell with 1
+    gcor[clen,clen] &lt;- 1
  
    
   list(result1=ent1,result2=gcor)   
@@ -147,31 +148,25 @@ rownames(gcor) &lt;- variables
 <p>The below lines have to be executed to find the number of rows and number of variables in the dataframe , so that the user can select the appropriate sliding window.</p>
 <p>User Action : Run the below lines and select the sliding window</p>
 <pre class="r"><code>entr1(path)$result2 ## Run this line for selecting the number of rows</code></pre>
-<pre><code>## [1] 15</code></pre>
+<pre><code>## [1] 9</code></pre>
 <pre class="r"><code>entr1(path)$result3 ## Run this line for finding number of columns in the dataframe</code></pre>
-<pre><code>## [1] 10</code></pre>
+<pre><code>## [1] 2</code></pre>
 <p>Step 6</p>
 <p>The below steps executes the main function to calculate the entropy and correlation between the variables.</p>
 <p>User Action : Enter the window for executing the function.</p>
-<pre class="r"><code>entropy_matrix &lt;- entr2(5)$result1 ## Run this line to get the values for the entropy matrix
+<pre class="r"><code>entropy_matrix &lt;- entr2(9)$result1 ## Run this line to get the values for the entropy matrix
  
-correl_matrix &lt;- entr2(5)$result2 ## Run this line to get the values for the correlation matrix
+correl_matrix &lt;- entr2(9)$result2 ## Run this line to get the values for the correlation matrix
  
  
 entropy_matrix ## displaying the entropy matrix</code></pre>
-<pre><code>##           var1      var2      var3      var4      var5
-## var1 1.0000000 1.1219281 0.9709506 1.5219281 0.9709506
-## var2 1.1219281 1.0000000 0.9709506 1.5219281 0.9709506
-## var3 0.9709506 0.9709506 1.0000000 0.9709506 0.4199731
-## var4 1.5219281 1.5219281 0.9709506 1.0000000 1.3709506
-## var5 0.9709506 0.9709506 0.4199731 1.3709506 1.0000000</code></pre>
+<pre><code>##           X         Y
+## X 1.0000000 0.5032583
+## Y 0.5032583 1.0000000</code></pre>
 <pre class="r"><code>correl_matrix ## Displaying the correlation matrix</code></pre>
-<pre><code>##           var1      var2      var3      var4      var5
-## var1 1.0000000 0.9454899 0.9255101 0.9758838 0.9255101
-## var2 0.9454899 1.0000000 0.9255101 0.9758838 0.9255101
-## var3 0.9255101 0.9255101 1.0000000 0.9255101 0.7538344
-## var4 0.9758838 0.9758838 0.9255101 1.0000000 0.9672395
-## var5 0.9255101 0.9255101 0.7538344 0.9672395 1.0000000</code></pre>
+<pre><code>##           X         Y
+## X 1.0000000 0.7965614
+## Y 0.7965614 1.0000000</code></pre>
 
 
 </div>

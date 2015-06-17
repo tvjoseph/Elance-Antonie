@@ -16,7 +16,7 @@ User Action : Define the path to the csv file
  
  
 ```{r}
-path <- "E:/elance/entropy.csv"
+path <- "E:/elance/entropy1.csv"
 
 ```
 
@@ -54,24 +54,23 @@ varcol <- entr1(path)$result3
 The below function is the main function to calculate the entropies between the selected variables and also to calculate the correlation between the variables.
  
 User Action : Run the entr2 function
-
 ```{r}
-
 entr2 <- function(wind){
-  if((wind > varrow) | (wind > varcol)){stop("Window selected is out of range")} ## Stopping the function if the window selected is greater than the number of rows or variables present
+  if(wind > varrow){stop("Window selected is out of range")} ## Stopping the function if the window selected is greater than the number of rows or variables present
                
-entrop1 <- entrop[1:wind,1:wind]
+entrop1 <- entrop[1:wind,]
 variables <- names(entrop1) ## listing the variables which are selected using the sliding window
-ent <- matrix(0,nrow = wind,ncol=1) ## Defining the empty matrix for storing the entropy values
-ent1 <- matrix(0,nrow= wind,ncol=wind) ## Defining the empty matrix for storing mutual entropy values
+clen <- length(variables)
+ent <- matrix(0,nrow = clen,ncol=1) ## Defining the empty matrix for storing the entropy values
+ent1 <- matrix(0,nrow= clen,ncol=clen) ## Defining the empty matrix for storing mutual entropy values
 colnames(ent1) <- variables
 rownames(ent1) <- variables
-gcor <- matrix(0,nrow= wind,ncol=wind) ## Defining the empty matrix for storing general correlation values
+gcor <- matrix(0,nrow= clen,ncol=clen) ## Defining the empty matrix for storing general correlation values
 colnames(gcor) <- variables
 rownames(gcor) <- variables
  
  
-  for (i in 1:wind) {
+  for (i in 1:clen) {
  
   temp <- as.data.frame(table(entrop1[,i])) ## This is to divide into bins and calculate the frequencies of each bins. The number of bins is equal to the unique values of the variable
   temp$prob <- temp$Freq/wind ## Calculating the probabilities of each of the values
@@ -82,11 +81,11 @@ rownames(gcor) <- variables
 
 ## Second For loop for calculating entropy and correlations
  
-    for ( i in 1:wind-1){
+    for ( i in 1:clen-1){
                
     j = i+1
                
-      for(k in j:wind){
+      for(k in j:clen){
  
         temp1 <- entrop1[,c(i,k)] ## Creating a temporary data frame with only the relevant variables
         temp2 <- as.data.frame(table(temp1))
@@ -103,14 +102,13 @@ rownames(gcor) <- variables
     ent1[i,i] <- 1
     gcor[i,i] <- 1
                           }             
-    ent1[wind,wind] <- 1 ## The below lines are to update the last diagonal cell with 1
-    gcor[wind,wind] <- 1
+    ent1[clen,clen] <- 1 ## The below lines are to update the last diagonal cell with 1
+    gcor[clen,clen] <- 1
  
    
   list(result1=ent1,result2=gcor)   
   
 }
-
 
 ```
 
@@ -134,9 +132,9 @@ The below steps executes the main function to calculate the entropy and correlat
  
 User Action : Enter the window for executing the function.
 ```{r}
-entropy_matrix <- entr2(5)$result1 ## Run this line to get the values for the entropy matrix
+entropy_matrix <- entr2(9)$result1 ## Run this line to get the values for the entropy matrix
  
-correl_matrix <- entr2(5)$result2 ## Run this line to get the values for the correlation matrix
+correl_matrix <- entr2(9)$result2 ## Run this line to get the values for the correlation matrix
  
  
 entropy_matrix ## displaying the entropy matrix
